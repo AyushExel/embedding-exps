@@ -48,7 +48,7 @@ def evaluate_baseline(model, ds_full, ds_eval, evaluator_name="baseline"):
     )
 
     evaluator = TripletEvaluator(
-        anchors=hard_eval["question"],
+        anchors=hard_eval["query"],
         positives=hard_eval["answer"],
         negatives=hard_eval["negative_1"],
         name=evaluator_name
@@ -82,10 +82,10 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
 
     loss = MultipleNegativesRankingLoss(SentenceTransformer(model_name))
     evaluator = TripletEvaluator(
-        anchors=hard_eval["question"],
+        anchors=hard_eval["query"],
         positives=hard_eval["answer"],
         negatives=hard_eval["negative_1"],
-        name="gooqa-dev"
+        name="ft-dev"
     )
 
     args = SentenceTransformerTrainingArguments(
