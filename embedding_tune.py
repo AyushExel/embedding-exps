@@ -15,6 +15,7 @@ def setup_env(cache_dir="/models"):
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     os.environ["HF_HOME"] = cache_dir
     os.environ["HF_HUB_CACHE"] = cache_dir
+    os.environ["WANDB_PROJECT"] = "xyneft"
     if not os.environ["WANDB_API_KEY"]:
         WANDB_DISABLED = True
 
@@ -99,7 +100,7 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
         save_steps=2,
         save_total_limit=2,
         logging_steps=1,
-        run_name=f"{model_name.split('/')[-1]}-{num_epochs}e",
+        run_name=f"xynft-{model_name.split('/')[-1]}-{num_epochs}e",
         report_to="wandb"
     )
 
