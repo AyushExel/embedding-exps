@@ -43,7 +43,7 @@ def evaluate_baseline(model, ds_full, ds_eval, evaluator_name="baseline"):
     hard_eval = mine_negatives(
         ds_eval,
         embed_model=embed_model_cpu,
-        corpus=list(ds_full["answer"]),  # ensure correct type
+        corpus=list(ds_full["answer"]),
         include_positives=True
     )
 
@@ -78,7 +78,7 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
         for i in range(0, len(ds_train), 200_000)
     ])
 
-    hard_eval = mine_negatives(ds_eval, embed_model, corpus=ds_full["answer"], include_positives=True)
+    hard_eval = mine_negatives(ds_eval, embed_model, corpus=list(ds_full["answer"]), include_positives=True)
 
     loss = MultipleNegativesRankingLoss(SentenceTransformer(model_name))
     evaluator = TripletEvaluator(
