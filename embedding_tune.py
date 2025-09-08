@@ -20,7 +20,7 @@ def setup_env(cache_dir="/models"):
         WANDB_DISABLED = True
 
 
-def prepare_datasets(dataset_name="ayushexel/xyneft", sample_size=200_000, test_size=5000, seed=12):
+def prepare_datasets(dataset_name="ayushexel/xyneft", sample_size=1080, test_size=250, seed=12):
     ds = load_dataset(dataset_name, split="train").select(range(sample_size))
     split = ds.train_test_split(test_size=test_size, seed=seed)
     return ds, split["train"], split["test"]
