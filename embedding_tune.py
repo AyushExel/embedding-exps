@@ -121,4 +121,4 @@ def train_model(num_epochs=10, cache_dir="/models", learning_rate=3e-5, weight_d
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     setup_env()
-    train_model(num_epochs=2)
+    train_model(num_epochs=4)
