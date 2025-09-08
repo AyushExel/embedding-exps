@@ -36,24 +36,29 @@ def mine_negatives(dataset, embed_model, num_negatives=1, batch_size=512, **kwar
     )
 
 def evaluate_baseline(model, ds_full, ds_eval, evaluator_name="baseline"):
-    # Mine hard negatives once to form triplet eval dataset
-    embed_model_cpu = SentenceTransformer("sentence-transformers/static-retrieval-mrl-en-v1", device="cpu")
+    embed_model_cpu = SentenceTransformer(
+        "sentence-transformers/static-retrieval-mrl-en-v1", device="cpu"
+    )
+
     hard_eval = mine_negatives(
         ds_eval,
         embed_model=embed_model_cpu,
-        corpus=ds_full["answer"],
+        corpus=list(ds_full["answer"]),  # ensure correct type
         include_positives=True
     )
+
     evaluator = TripletEvaluator(
         anchors=hard_eval["question"],
         positives=hard_eval["answer"],
         negatives=hard_eval["negative_1"],
         name=evaluator_name
     )
+
     logging.info(f"Evaluating baseline with {evaluator_name} evaluator")
     results = evaluator(model)
     logging.info(f"Baseline results: {results}")
     return results
+
 
 def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_decay=0.01, warmup_ratio=0.1):
     hf_login(token=os.environ.get("HF_TOKEN"))
