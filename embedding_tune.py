@@ -16,9 +16,8 @@ def setup_env(cache_dir="/models"):
     os.environ["HF_HOME"] = cache_dir
     os.environ["HF_HUB_CACHE"] = cache_dir
     os.environ["WANDB_PROJECT"] = "xyneft"
-    if not os.environ["WANDB_API_KEY"]:
+    if not os.environ.get("WANDB_API_KEY"):
         WANDB_DISABLED = True
-
 
 def prepare_datasets(dataset_name="ayushexel/xyneft", sample_size=1080, test_size=250, seed=12):
     ds = load_dataset(dataset_name, split="train").select(range(sample_size))
@@ -39,36 +38,32 @@ def evaluate_baseline(model, ds_full, ds_eval, evaluator_name="baseline"):
     embed_model_cpu = SentenceTransformer(
         "sentence-transformers/static-retrieval-mrl-en-v1", device="cpu"
     )
-
     hard_eval = mine_negatives(
         ds_eval,
         embed_model=embed_model_cpu,
         corpus=list(ds_full["answer"]),
         include_positives=True
     )
-
     evaluator = TripletEvaluator(
         anchors=hard_eval["query"],
         positives=hard_eval["answer"],
         negatives=hard_eval["negative_1"],
         name=evaluator_name
     )
-
     logging.info(f"Evaluating baseline with {evaluator_name} evaluator")
     results = evaluator(model)
     logging.info(f"Baseline results: {results}")
     return results
 
-
-def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_decay=0.01, warmup_ratio=0.1):
+def train_model(num_epochs=10, cache_dir="/models", learning_rate=3e-5, weight_decay=0.01, warmup_ratio=0.1):
     hf_login(token=os.environ.get("HF_TOKEN"))
-    wandb.login(key=os.environ["WANDB_API_KEY"]) if not WANDB_DISABLED else None
+    if not WANDB_DISABLED:
+        wandb.login(key=os.environ["WANDB_API_KEY"])
 
     ds_full, ds_train, ds_eval = prepare_datasets()
     model_name = "google/embeddinggemma-300m"
     model = SentenceTransformer(model_name)
 
-    # Baseline evaluation before fine-tuning
     evaluate_baseline(model, ds_full, ds_eval, evaluator_name="baseline_pre_training")
 
     embed_model = SentenceTransformer("sentence-transformers/static-retrieval-mrl-en-v1", device="cpu")
@@ -80,7 +75,7 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
 
     hard_eval = mine_negatives(ds_eval, embed_model, corpus=list(ds_full["answer"]), include_positives=True)
 
-    loss = MultipleNegativesRankingLoss(SentenceTransformer(model_name))
+    loss = MultipleNegativesRankingLoss(model)
     evaluator = TripletEvaluator(
         anchors=hard_eval["query"],
         positives=hard_eval["answer"],
@@ -106,14 +101,13 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
         save_total_limit=2,
         logging_steps=10,
         run_name=f"xynft-{model_name.split('/')[-1]}-{num_epochs}e",
-        report_to="wandb"
+        report_to="wandb" if not WANDB_DISABLED else "none"
     )
 
     trainer = SentenceTransformerTrainer(
-        model=SentenceTransformer(model_name),
+        model=model,
         args=args,
         train_dataset=hard_train,
-        eval_dataset=ds_eval,
         loss=loss,
         evaluator=evaluator,
     )
@@ -124,11 +118,7 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
     trainer.model.save_pretrained(final_dir)
     trainer.model.push_to_hub(args.run_name)
 
-def run_train_loop(start_epoch=6, end_epoch=11):
-    for epoch in range(start_epoch, end_epoch):
-        train_model(num_epochs=epoch)
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     setup_env()
-    run_train_loop()
+    train_model(num_epochs=5)
