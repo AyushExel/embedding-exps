@@ -124,7 +124,7 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
     trainer.model.save_pretrained(final_dir)
     trainer.model.push_to_hub(args.run_name)
 
-def run_train_loop(start_epoch=2, end_epoch=11):
+def run_train_loop(start_epoch=6, end_epoch=11):
     for epoch in range(start_epoch, end_epoch):
         train_model(num_epochs=epoch)
 
