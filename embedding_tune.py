@@ -103,7 +103,7 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
         eval_steps=10,
         save_strategy="steps",
         save_steps=10,
-        save_total_limit=3,
+        save_total_limit=2,
         logging_steps=10,
         run_name=f"xynft-{model_name.split('/')[-1]}-{num_epochs}e",
         report_to="wandb"
