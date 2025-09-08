@@ -91,8 +91,8 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
     args = SentenceTransformerTrainingArguments(
         output_dir=os.path.join(cache_dir, f"{model_name.split('/')[-1]}-{num_epochs}e"),
         num_train_epochs=num_epochs,
-        per_device_train_batch_size=512,
-        per_device_eval_batch_size=512,
+        per_device_train_batch_size=256,
+        per_device_eval_batch_size=256,
         learning_rate=learning_rate,
         weight_decay=weight_decay,
         warmup_ratio=warmup_ratio,
