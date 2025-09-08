@@ -91,8 +91,8 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
     args = SentenceTransformerTrainingArguments(
         output_dir=os.path.join(cache_dir, f"{model_name.split('/')[-1]}-{num_epochs}e"),
         num_train_epochs=num_epochs,
-        per_device_train_batch_size=256,
-        per_device_eval_batch_size=256,
+        per_device_train_batch_size=128,
+        per_device_eval_batch_size=128,
         learning_rate=learning_rate,
         weight_decay=weight_decay,
         warmup_ratio=warmup_ratio,
@@ -100,11 +100,11 @@ def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_de
         bf16=False,
         batch_sampler=BatchSamplers.NO_DUPLICATES,
         eval_strategy="steps",
-        eval_steps=2,
+        eval_steps=10,
         save_strategy="steps",
-        save_steps=2,
-        save_total_limit=2,
-        logging_steps=1,
+        save_steps=10,
+        save_total_limit=3,
+        logging_steps=10,
         run_name=f"xynft-{model_name.split('/')[-1]}-{num_epochs}e",
         report_to="wandb"
     )
