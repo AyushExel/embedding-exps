@@ -56,7 +56,7 @@ def evaluate_baseline(model, ds_full, ds_eval, evaluator_name="baseline"):
 
 def train_model(num_epochs=1, cache_dir="/models", learning_rate=3e-5, weight_decay=0.01, warmup_ratio=0.1):
     hf_login(token=os.environ.get("HF_TOKEN"))
-    wandb.login()
+    wandb.login(key=os.environ["WANDB_API_KEY"]) if not WANDB_DISABLED else None
 
     ds_full, ds_train, ds_eval = prepare_datasets()
     model_name = "google/embeddinggemma-300m"
